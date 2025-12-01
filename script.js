@@ -19,7 +19,7 @@ let cellSize = 18;
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
 const center = { x: 0, y: 0 };
 let maxRadius = 260;
-const wave = { frequency: 0.045, speed: 0.0025, amplitude: 0.05 };
+const wave = { frequency: 0.022, speed: 0.0015, amplitude: 0.024 };
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -28,7 +28,7 @@ function resizeCanvas() {
   cellSize = Math.max(12, Math.min(24, Math.floor(maxDimension / 60)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.16;
+  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.085;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
@@ -82,11 +82,11 @@ function draw(timestamp = 0) {
   const cols = Math.ceil(canvas.width / cellSize);
   const rows = Math.ceil(canvas.height / cellSize);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.38);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.38);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.72);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.72);
 
-  const offsetCenterX = lerp(center.x, mouse.x, 0.68);
-  const offsetCenterY = lerp(center.y, mouse.y, 0.68);
+  const offsetCenterX = lerp(center.x, mouse.x, 0.95);
+  const offsetCenterY = lerp(center.y, mouse.y, 0.95);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
