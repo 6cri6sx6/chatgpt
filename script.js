@@ -9,28 +9,18 @@ const palette = {
 
 const baseRgb = [palette.bg1, palette.bg2].map(hexToRgb);
 const accentRgb = hexToRgb(palette.accent1);
-const gradientStops = [
-  baseRgb[0],
-  baseRgb[1],
-  lerpColor(accentRgb, baseRgb[1], 0.35),
-];
+const gradientStops = [baseRgb[0], baseRgb[1], lerpColor(accentRgb, baseRgb[1], 0.4)];
 
-let cellSize = 8;
+let cellSize = 6;
 let minDim = 0;
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-let focusRadius = 120;
-let haloRadius = 1100;
+let focusRadius = 110;
+let haloRadius = 900;
 let lastTime = 0;
 
-const bubbles = [];
-const pointerBubble = { radius: 0.075, color: gradientStops[2] };
-const ripple = { freq: 0.035, speed: 0.0024, amp: 0.14 };
-
-const physics = {
-  sticky: 0.18,
-  drag: 0.95,
-  maxSpeed: 120,
-};
+const anchors = [];
+const pointerBubble = { radius: 0.08, color: gradientStops[2] };
+const ripple = { freq: 0.035, speed: 0.002, amp: 0.11 };
 
 function resizeCanvas() {
   const prevWidth = canvas.width || window.innerWidth;
@@ -40,19 +30,19 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
   const maxDimension = Math.max(canvas.width, canvas.height);
   minDim = Math.min(canvas.width, canvas.height);
-  cellSize = Math.max(3, Math.min(7, Math.floor(maxDimension / 190)));
-  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.012;
-  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.2;
+  cellSize = Math.max(3, Math.min(6, Math.floor(maxDimension / 200)));
+  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.01;
+  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.24;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = canvas.width / 2;
     mouse.y = mouse.targetY = canvas.height / 2;
   }
 
-  if (!bubbles.length) {
-    initBubbles();
+  if (!anchors.length) {
+    initAnchors();
   } else {
-    scaleBubbles(prevWidth, prevHeight);
+    scaleAnchors(prevWidth, prevHeight);
   }
 }
 
@@ -74,31 +64,34 @@ function paletteGradient(t) {
   return lerpColor(c1, c2, localT);
 }
 
-function initBubbles() {
-  const count = 3;
-  for (let i = 0; i < count; i++) {
-    const ratio = 0.06 + Math.random() * 0.015;
-    const radius = minDim * ratio;
-    bubbles.push({
-      x: canvas.width * (0.2 + Math.random() * 0.6),
-      y: canvas.height * (0.2 + Math.random() * 0.6),
-      radius,
-      ratio,
-      vx: (Math.random() * 2 - 1) * 55,
-      vy: (Math.random() * 2 - 1) * 55,
-      tint: i / (count - 1 || 1),
-      phase: Math.random() * Math.PI * 2,
+function initAnchors() {
+  const configs = [
+    { radiusRatio: 0.24, speed: 0.12, amp: 0.12, offset: 0, tint: 0.05 },
+    { radiusRatio: 0.22, speed: -0.09, amp: 0.14, offset: Math.PI * 0.7, tint: 0.45 },
+    { radiusRatio: 0.2, speed: 0.07, amp: 0.1, offset: Math.PI * 1.3, tint: 0.8 },
+  ];
+
+  configs.forEach((cfg) => {
+    anchors.push({
+      x: canvas.width * 0.5,
+      y: canvas.height * 0.5,
+      radiusRatio: cfg.radiusRatio,
+      radius: minDim * cfg.radiusRatio,
+      speed: cfg.speed,
+      amp: cfg.amp,
+      offset: cfg.offset,
+      tint: cfg.tint,
     });
-  }
+  });
 }
 
-function scaleBubbles(prevWidth, prevHeight) {
-  bubbles.forEach((bubble) => {
-    const nx = bubble.x / (prevWidth || 1);
-    const ny = bubble.y / (prevHeight || 1);
-    bubble.x = canvas.width * nx;
-    bubble.y = canvas.height * ny;
-    bubble.radius = minDim * bubble.ratio;
+function scaleAnchors(prevWidth, prevHeight) {
+  anchors.forEach((anchor) => {
+    const nx = anchor.x / (prevWidth || 1);
+    const ny = anchor.y / (prevHeight || 1);
+    anchor.x = canvas.width * nx;
+    anchor.y = canvas.height * ny;
+    anchor.radius = minDim * anchor.radiusRatio;
   });
 }
 
@@ -124,55 +117,19 @@ function rgbToString({ r, g, b }) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-function backgroundTint(xNorm, yNorm) {
-  const mix = clamp01((xNorm + yNorm) / 2);
+function backgroundTint(xNorm, yNorm, t) {
+  const drift = (Math.sin(t * 0.00008) + Math.cos(t * 0.00011)) * 0.05;
+  const mix = clamp01((xNorm + yNorm) / 2 + drift);
   return lerpColor(baseRgb[0], baseRgb[1], mix);
 }
 
-function updateBubbles(delta, t) {
-  const dt = delta / 1000;
-  const targetSpacing = minDim * 0.2;
-  const wobble = Math.sin(t * 0.0015) * 8;
-
-  for (let i = 0; i < bubbles.length; i++) {
-    for (let j = i + 1; j < bubbles.length; j++) {
-      const a = bubbles[i];
-      const b = bubbles[j];
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const dist = Math.hypot(dx, dy) + 0.001;
-      const diff = dist - targetSpacing;
-      const force = clamp01(Math.abs(diff) / targetSpacing) * Math.sign(diff) * physics.sticky;
-      const fx = (dx / dist) * force * 140;
-      const fy = (dy / dist) * force * 140;
-      a.vx += fx * dt;
-      a.vy += fy * dt;
-      b.vx -= fx * dt;
-      b.vy -= fy * dt;
-    }
-  }
-
-  bubbles.forEach((bubble, i) => {
-    bubble.vx += Math.sin(t * 0.0008 + i) * wobble * dt;
-    bubble.vy += Math.cos(t * 0.0009 + i * 0.7) * wobble * dt;
-
-    bubble.vx *= physics.drag;
-    bubble.vy *= physics.drag;
-
-    const speed = Math.hypot(bubble.vx, bubble.vy);
-    if (speed > physics.maxSpeed) {
-      const scale = physics.maxSpeed / speed;
-      bubble.vx *= scale;
-      bubble.vy *= scale;
-    }
-
-    bubble.x += bubble.vx * dt;
-    bubble.y += bubble.vy * dt;
-
-    if (bubble.x < -bubble.radius) bubble.x = canvas.width + bubble.radius;
-    if (bubble.x > canvas.width + bubble.radius) bubble.x = -bubble.radius;
-    if (bubble.y < -bubble.radius) bubble.y = canvas.height + bubble.radius;
-    if (bubble.y > canvas.height + bubble.radius) bubble.y = -bubble.radius;
+function updateAnchors(t) {
+  anchors.forEach((anchor, i) => {
+    const angle = t * anchor.speed + anchor.offset;
+    const wobble = Math.sin(t * 0.00035 + i) * minDim * 0.02;
+    anchor.x = canvas.width / 2 + Math.cos(angle) * minDim * anchor.amp + wobble;
+    anchor.y = canvas.height / 2 + Math.sin(angle * 1.1) * minDim * anchor.amp;
+    anchor.radius = minDim * anchor.radiusRatio * (1 + Math.sin(t * 0.00022 + i) * 0.05);
   });
 }
 
@@ -183,14 +140,14 @@ function pixelColor(px, py, t) {
   let accumulator = { r: 0, g: 0, b: 0 };
   let weight = 0;
 
-  bubbles.forEach((bubble) => {
-    const dist = Math.hypot(px - bubble.x, py - bubble.y);
-    const influence = Math.exp(-(dist * dist) / (2 * Math.pow(bubble.radius, 2)));
-    const wave = Math.sin(t * 0.00025 + bubble.phase) * 0.08;
-    const tint = paletteGradient(bubble.tint + wave);
-    accumulator.r += tint.r * influence * 0.85;
-    accumulator.g += tint.g * influence * 0.85;
-    accumulator.b += tint.b * influence * 0.85;
+  anchors.forEach((anchor) => {
+    const dist = Math.hypot(px - anchor.x, py - anchor.y);
+    const influence = Math.exp(-(dist * dist) / (2 * Math.pow(anchor.radius, 2)));
+    const wave = Math.sin(t * 0.00018 + anchor.tint * 6) * 0.06;
+    const tint = paletteGradient(anchor.tint + wave);
+    accumulator.r += tint.r * influence * 0.9;
+    accumulator.g += tint.g * influence * 0.9;
+    accumulator.b += tint.b * influence * 0.9;
     weight += influence;
   });
 
@@ -200,19 +157,20 @@ function pixelColor(px, py, t) {
   const rippleShift = Math.sin(distPointer * ripple.freq - t * ripple.speed) * ripple.amp;
   const pointerInfluence = Math.exp(-Math.pow(distPointer / (focusRadius * (1 + rippleShift)), 2));
 
-  accumulator.r += pointerBubble.color.r * pointerInfluence * 0.9;
-  accumulator.g += pointerBubble.color.g * pointerInfluence * 0.9;
-  accumulator.b += pointerBubble.color.b * pointerInfluence * 0.9;
-  weight += pointerInfluence * 0.9;
+  accumulator.r += pointerBubble.color.r * pointerInfluence;
+  accumulator.g += pointerBubble.color.g * pointerInfluence;
+  accumulator.b += pointerBubble.color.b * pointerInfluence;
+  weight += pointerInfluence;
 
-  const haloInfluence = clamp01(1 - distPointer / haloRadius) * 0.06;
-  const haloColor = paletteGradient(0.18);
+  const haloInfluence = clamp01(1 - distPointer / haloRadius) * 0.08;
+  const haloColor = paletteGradient(0.2);
   accumulator.r += haloColor.r * haloInfluence;
   accumulator.g += haloColor.g * haloInfluence;
   accumulator.b += haloColor.b * haloInfluence;
   weight += haloInfluence;
 
-  if (weight === 0) return backgroundTint(xNorm, yNorm);
+  const base = backgroundTint(xNorm, yNorm, t);
+  if (weight === 0) return base;
 
   const blended = {
     r: accumulator.r / weight,
@@ -220,7 +178,6 @@ function pixelColor(px, py, t) {
     b: accumulator.b / weight,
   };
 
-  const base = backgroundTint(xNorm, yNorm);
   return lerpColor(base, blended, clamp01(weight));
 }
 
@@ -232,10 +189,10 @@ function draw(timestamp = 0) {
   const cols = Math.ceil(canvas.width / cellSize);
   const rows = Math.ceil(canvas.height / cellSize);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.96);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.96);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.9);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.9);
 
-  updateBubbles(delta, timestamp);
+  updateAnchors(timestamp);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
