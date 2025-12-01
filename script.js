@@ -5,12 +5,15 @@ const palette = {
   bg1: getComputedStyle(document.documentElement).getPropertyValue('--bg-dark-1').trim(),
   bg2: getComputedStyle(document.documentElement).getPropertyValue('--bg-dark-2').trim(),
   accent1: getComputedStyle(document.documentElement).getPropertyValue('--accent-1').trim(),
-  accent2: getComputedStyle(document.documentElement).getPropertyValue('--accent-2').trim(),
-  accent3: getComputedStyle(document.documentElement).getPropertyValue('--accent-3').trim(),
 };
 
 const baseRgb = [palette.bg1, palette.bg2].map(hexToRgb);
-const glowRgb = [palette.accent1, palette.accent2, palette.accent3].map(hexToRgb);
+const accentRgb = hexToRgb(palette.accent1);
+const gradientStops = [
+  baseRgb[0],
+  baseRgb[1],
+  lerpColor(accentRgb, baseRgb[1], 0.35),
+];
 
 let cellSize = 8;
 let minDim = 0;
@@ -20,7 +23,7 @@ let haloRadius = 1100;
 let lastTime = 0;
 
 const bubbles = [];
-const pointerBubble = { radius: 0.08, color: glowRgb[1] };
+const pointerBubble = { radius: 0.075, color: gradientStops[2] };
 const ripple = { freq: 0.035, speed: 0.0024, amp: 0.14 };
 
 const physics = {
@@ -37,9 +40,9 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
   const maxDimension = Math.max(canvas.width, canvas.height);
   minDim = Math.min(canvas.width, canvas.height);
-  cellSize = Math.max(4, Math.min(8, Math.floor(maxDimension / 180)));
-  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.014;
-  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.22;
+  cellSize = Math.max(3, Math.min(7, Math.floor(maxDimension / 190)));
+  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.012;
+  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.2;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = canvas.width / 2;
@@ -61,19 +64,30 @@ function clamp01(v) {
   return Math.min(1, Math.max(0, v));
 }
 
+function paletteGradient(t) {
+  const clamped = ((t % 1) + 1) % 1;
+  const pos = clamped * (gradientStops.length - 1);
+  const idx = Math.floor(pos);
+  const localT = pos - idx;
+  const c1 = gradientStops[idx];
+  const c2 = gradientStops[Math.min(idx + 1, gradientStops.length - 1)];
+  return lerpColor(c1, c2, localT);
+}
+
 function initBubbles() {
-  const count = 6;
+  const count = 3;
   for (let i = 0; i < count; i++) {
-    const ratio = 0.04 + Math.random() * 0.02;
+    const ratio = 0.06 + Math.random() * 0.015;
     const radius = minDim * ratio;
     bubbles.push({
       x: canvas.width * (0.2 + Math.random() * 0.6),
       y: canvas.height * (0.2 + Math.random() * 0.6),
       radius,
       ratio,
-      vx: (Math.random() * 2 - 1) * 60,
-      vy: (Math.random() * 2 - 1) * 60,
-      color: glowRgb[i % glowRgb.length],
+      vx: (Math.random() * 2 - 1) * 55,
+      vy: (Math.random() * 2 - 1) * 55,
+      tint: i / (count - 1 || 1),
+      phase: Math.random() * Math.PI * 2,
     });
   }
 }
@@ -172,9 +186,11 @@ function pixelColor(px, py, t) {
   bubbles.forEach((bubble) => {
     const dist = Math.hypot(px - bubble.x, py - bubble.y);
     const influence = Math.exp(-(dist * dist) / (2 * Math.pow(bubble.radius, 2)));
-    accumulator.r += bubble.color.r * influence;
-    accumulator.g += bubble.color.g * influence;
-    accumulator.b += bubble.color.b * influence;
+    const wave = Math.sin(t * 0.00025 + bubble.phase) * 0.08;
+    const tint = paletteGradient(bubble.tint + wave);
+    accumulator.r += tint.r * influence * 0.85;
+    accumulator.g += tint.g * influence * 0.85;
+    accumulator.b += tint.b * influence * 0.85;
     weight += influence;
   });
 
@@ -184,15 +200,16 @@ function pixelColor(px, py, t) {
   const rippleShift = Math.sin(distPointer * ripple.freq - t * ripple.speed) * ripple.amp;
   const pointerInfluence = Math.exp(-Math.pow(distPointer / (focusRadius * (1 + rippleShift)), 2));
 
-  accumulator.r += pointerBubble.color.r * pointerInfluence * 1.4;
-  accumulator.g += pointerBubble.color.g * pointerInfluence * 1.4;
-  accumulator.b += pointerBubble.color.b * pointerInfluence * 1.4;
-  weight += pointerInfluence * 1.4;
+  accumulator.r += pointerBubble.color.r * pointerInfluence * 0.9;
+  accumulator.g += pointerBubble.color.g * pointerInfluence * 0.9;
+  accumulator.b += pointerBubble.color.b * pointerInfluence * 0.9;
+  weight += pointerInfluence * 0.9;
 
-  const haloInfluence = clamp01(1 - distPointer / haloRadius) * 0.08;
-  accumulator.r += glowRgb[2].r * haloInfluence;
-  accumulator.g += glowRgb[2].g * haloInfluence;
-  accumulator.b += glowRgb[2].b * haloInfluence;
+  const haloInfluence = clamp01(1 - distPointer / haloRadius) * 0.06;
+  const haloColor = paletteGradient(0.18);
+  accumulator.r += haloColor.r * haloInfluence;
+  accumulator.g += haloColor.g * haloInfluence;
+  accumulator.b += haloColor.b * haloInfluence;
   weight += haloInfluence;
 
   if (weight === 0) return backgroundTint(xNorm, yNorm);
