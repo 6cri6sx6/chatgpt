@@ -1,0 +1,56 @@
+:root {
+  --bg-dark-1: #003d33;
+  --bg-dark-2: #005544;
+  --accent-1: #d14234;
+  --accent-2: #f2a55f;
+  --accent-3: #e8dec5;
+  --text-main: #eae3d9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg-dark-1);
+  color: var(--text-main);
+  font-family: "Press Start 2P", "VT323", "Share Tech Mono", monospace;
+  overflow: hidden;
+}
+
+#pixel-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: var(--bg-dark-1);
+  image-rendering: pixelated;
+  filter: saturate(0.95);
+  z-index: 0;
+}
+
+.overlay {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 90vw);
+  margin: 8vh auto;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--bg-dark-1) 75%, var(--bg-dark-2) 25%);
+  border: 2px solid var(--accent-1);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.overlay h1 {
+  margin: 0 0 0.75rem;
+  letter-spacing: 1px;
+}
+
+.overlay p {
+  margin: 0;
+  color: var(--accent-3);
+}
