@@ -19,12 +19,12 @@ let focusRadius = 120;
 let haloRadius = 1100;
 
 const bubbles = [
-  { offsetX: -0.22, offsetY: -0.18, radius: 0.32, speed: 0.00012, sway: 80, color: glowRgb[1] },
-  { offsetX: 0.25, offsetY: -0.28, radius: 0.36, speed: -0.0001, sway: 70, color: glowRgb[0] },
-  { offsetX: -0.12, offsetY: 0.22, radius: 0.28, speed: 0.00015, sway: 120, color: glowRgb[2] },
+  { offsetX: -0.22, offsetY: -0.18, radius: 0.16, speed: 0.00012, sway: 70, color: glowRgb[1] },
+  { offsetX: 0.25, offsetY: -0.28, radius: 0.18, speed: -0.0001, sway: 60, color: glowRgb[0] },
+  { offsetX: -0.12, offsetY: 0.22, radius: 0.14, speed: 0.00015, sway: 100, color: glowRgb[2] },
 ];
 
-const pointerBubble = { radius: 0.18, color: glowRgb[1] };
+const pointerBubble = { radius: 0.12, color: glowRgb[1] };
 const ripple = { freq: 0.025, speed: 0.0022, amp: 0.12 };
 
 function resizeCanvas() {
@@ -34,8 +34,8 @@ function resizeCanvas() {
   cellSize = Math.max(5, Math.min(9, Math.floor(maxDimension / 150)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.024;
-  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.34;
+  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.018;
+  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.28;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
