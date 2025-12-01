@@ -1,10 +1,10 @@
 :root {
-  --bg-dark-1: #012019;
-  --bg-dark-2: #033427;
-  --accent-1: #0b6b50;
-  --accent-2: #3c8f6b;
-  --accent-3: #b3ccb8;
-  --text-main: #e5f1e9;
+  --bg-dark-1: #003d33;
+  --bg-dark-2: #005544;
+  --accent-1: #d14234;
+  --accent-2: #f2a55f;
+  --accent-3: #e8dec5;
+  --text-main: #eae3d9;
 }
 
 * {
@@ -16,7 +16,7 @@ html, body {
   min-height: 100%;
   background: var(--bg-dark-1);
   color: var(--text-main);
-  font-family: "Press Start 2P", "VT323", "Share Tech Mono", monospace;
+  font-family: "Inter", "Press Start 2P", "VT323", "Share Tech Mono", monospace;
   overflow: hidden;
 }
 
@@ -28,29 +28,58 @@ html, body {
   display: block;
   background: var(--bg-dark-1);
   image-rendering: pixelated;
-  filter: saturate(0.95);
+  filter: saturate(0.92);
   z-index: 0;
 }
 
-.overlay {
+.hero {
   position: relative;
   z-index: 1;
-  width: min(640px, 90vw);
+  width: min(960px, 92vw);
   margin: 8vh auto;
-  padding: 1.5rem;
-  background: color-mix(in srgb, var(--bg-dark-1) 75%, var(--bg-dark-2) 25%);
-  border: 2px solid var(--accent-1);
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.45);
-  border-radius: 8px;
+  padding: clamp(1.25rem, 2vw, 2.5rem);
+  border-radius: 16px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg-dark-1) 80%, var(--bg-dark-2) 20%);
+  border: 2px solid color-mix(in srgb, var(--accent-2) 70%, var(--accent-1) 30%);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.35), 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.halo-mask {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.65) 75%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   text-align: center;
 }
 
-.overlay h1 {
-  margin: 0 0 0.75rem;
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--accent-3);
+  opacity: 0.85;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.6rem);
   letter-spacing: 1px;
 }
 
-.overlay p {
+.lede {
   margin: 0;
-  color: var(--accent-3);
+  color: color-mix(in srgb, var(--accent-3) 80%, var(--text-main) 20%);
+  line-height: 1.6;
 }

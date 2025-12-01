@@ -9,29 +9,29 @@ const palette = {
 };
 
 const gradientStops = [
-  { pos: 0.0, color: palette.accent1 },
-  { pos: 0.32, color: palette.accent2 },
-  { pos: 0.64, color: palette.bg2 },
+  { pos: 0.0, color: palette.accent2 },
+  { pos: 0.18, color: palette.accent1 },
+  { pos: 0.4, color: palette.bg2 },
   { pos: 1.0, color: palette.bg1 },
 ];
 
-let cellSize = 18;
+let cellSize = 10;
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
 const center = { x: 0, y: 0 };
-let focusRadius = 220;
-let haloRadius = 1100;
-const halo = { color: palette.accent2, strength: 0.08 };
-const wave = { frequency: 0.028, speed: 0.0015, amplitude: 0.032 };
+let focusRadius = 150;
+let haloRadius = 1200;
+const halo = { color: palette.accent2, strength: 0.05 };
+const wave = { frequency: 0.022, speed: 0.0018, amplitude: 0.07 };
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   const maxDimension = Math.max(canvas.width, canvas.height);
-  cellSize = Math.max(6, Math.min(14, Math.floor(maxDimension / 100)));
+  cellSize = Math.max(5, Math.min(10, Math.floor(maxDimension / 140)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.045;
-  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.22;
+  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.032;
+  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.32;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
@@ -89,11 +89,11 @@ function draw(timestamp = 0) {
   const rows = Math.ceil(canvas.height / cellSize);
   const haloRgb = hexToRgb(halo.color);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.72);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.72);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.9);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.9);
 
-  const offsetCenterX = lerp(center.x, mouse.x, 0.95);
-  const offsetCenterY = lerp(center.y, mouse.y, 0.95);
+  const offsetCenterX = mouse.x;
+  const offsetCenterY = mouse.y;
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
