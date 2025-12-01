@@ -1,9 +1,16 @@
 :root {
-  /* Pixel gradient palette inspired by the reference image */
-  --bg-top: #46d8e3;
-  --bg-mid: #2f9ccf;
-  --bg-bottom: #4a2d8f;
+  /* Palette provided by the user */
+  --bg-dark-1: #003d33;
+  --bg-dark-2: #005544;
+  --accent-1: #d14234;
+  --accent-2: #f2a55f;
+  --accent-3: #e8dec5;
   --text-main: #eae3d9;
+
+  /* Gradient anchors for the canvas */
+  --bg-top: var(--bg-dark-1);
+  --bg-mid: color-mix(in srgb, var(--bg-dark-2) 75%, var(--accent-3) 25%);
+  --bg-bottom: color-mix(in srgb, var(--accent-1) 80%, black 20%);
 }
 
 * {

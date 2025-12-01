@@ -23,8 +23,8 @@ function resizeCanvas() {
   grid.cols = Math.ceil(canvas.width / grid.cell);
   grid.rows = Math.ceil(canvas.height / grid.cell);
 
-  highlightRadius = Math.hypot(canvas.width, canvas.height) * 0.08;
-  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.35;
+  highlightRadius = Math.hypot(canvas.width, canvas.height) * 0.075;
+  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.32;
 
   if (mouse.x === 0 && mouse.y === 0) {
     mouse.x = mouse.targetX = canvas.width / 2;
@@ -73,16 +73,19 @@ function pixelColor(x, y, t) {
   const dy = y - mouse.y;
   const dist = Math.hypot(dx, dy);
   const focus = Math.exp(-Math.pow(dist / highlightRadius, 2));
-  const halo = clamp01(1 - dist / haloRadius) * 0.12;
 
-  const highlight = lerpColor(base, palette[0], 0.18);
+  const wave = Math.max(0, Math.sin(dist / (grid.cell * 2.6) - t * 0.006));
+  const haloBase = clamp01(1 - dist / haloRadius);
+  const halo = haloBase * (0.1 + 0.08 * wave);
+
+  const highlight = lerpColor(base, palette[2], 0.08);
   const glow = {
-    r: base.r + (palette[0].r - base.r) * focus + halo * 80,
-    g: base.g + (palette[0].g - base.g) * focus + halo * 60,
-    b: base.b + (palette[0].b - base.b) * focus + halo * 120,
+    r: base.r + (palette[0].r - base.r) * focus + halo * 60,
+    g: base.g + (palette[1].g - base.g) * focus + halo * 70,
+    b: base.b + (palette[2].b - base.b) * focus + halo * 40,
   };
 
-  return lerpColor(base, lerpColor(glow, highlight, 0.35), clamp01(focus + halo));
+  return lerpColor(base, lerpColor(glow, highlight, 0.42), clamp01(focus + halo));
 }
 
 function draw(timestamp = 0) {
@@ -92,8 +95,8 @@ function draw(timestamp = 0) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.94);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.94);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.9);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.9);
 
   for (let y = 0; y < grid.rows; y++) {
     for (let x = 0; x < grid.cols; x++) {
