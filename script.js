@@ -18,8 +18,10 @@ const gradientStops = [
 let cellSize = 18;
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
 const center = { x: 0, y: 0 };
-let maxRadius = 260;
-const wave = { frequency: 0.028, speed: 0.0015, amplitude: 0.036 };
+let focusRadius = 220;
+let haloRadius = 1100;
+const halo = { color: palette.accent2, strength: 0.08 };
+const wave = { frequency: 0.028, speed: 0.0015, amplitude: 0.032 };
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -28,7 +30,8 @@ function resizeCanvas() {
   cellSize = Math.max(6, Math.min(14, Math.floor(maxDimension / 100)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.05;
+  focusRadius = Math.hypot(canvas.width, canvas.height) * 0.045;
+  haloRadius = Math.hypot(canvas.width, canvas.height) * 0.22;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
@@ -69,18 +72,22 @@ function sampleGradient(t) {
     const b = gradientStops[i + 1];
     if (clamped >= a.pos && clamped <= b.pos) {
       const localT = (clamped - a.pos) / (b.pos - a.pos || 1);
-      const color = lerpColor(hexToRgb(a.color), hexToRgb(b.color), localT);
-      return `rgb(${color.r}, ${color.g}, ${color.b})`;
+      return lerpColor(hexToRgb(a.color), hexToRgb(b.color), localT);
     }
   }
   const last = gradientStops[gradientStops.length - 1].color;
-  return last;
+  return hexToRgb(last);
+}
+
+function rgbToString({ r, g, b }) {
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 function draw(timestamp = 0) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const cols = Math.ceil(canvas.width / cellSize);
   const rows = Math.ceil(canvas.height / cellSize);
+  const haloRgb = hexToRgb(halo.color);
 
   mouse.x = lerp(mouse.x, mouse.targetX, 0.72);
   mouse.y = lerp(mouse.y, mouse.targetY, 0.72);
@@ -97,10 +104,14 @@ function draw(timestamp = 0) {
       const dist = Math.hypot(dx, dy);
 
       const ripple = Math.sin(dist * wave.frequency - timestamp * wave.speed) * wave.amplitude;
-      const gradientT = clamp01(dist / maxRadius + ripple);
-      const color = sampleGradient(gradientT);
+      const gradientT = clamp01(dist / focusRadius + ripple);
+      const baseColor = sampleGradient(gradientT);
 
-      ctx.fillStyle = color;
+      const haloFalloff = clamp01(1 - dist / haloRadius);
+      const haloMix = haloFalloff * halo.strength;
+      const finalColor = lerpColor(baseColor, haloRgb, haloMix);
+
+      ctx.fillStyle = rgbToString(finalColor);
       ctx.fillRect(px, py, cellSize, cellSize);
     }
   }
