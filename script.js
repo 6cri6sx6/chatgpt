@@ -18,7 +18,8 @@ const gradientStops = [
 let cellSize = 18;
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
 const center = { x: 0, y: 0 };
-let maxRadius = 400;
+let maxRadius = 260;
+const wave = { frequency: 0.045, speed: 0.0025, amplitude: 0.05 };
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -27,7 +28,7 @@ function resizeCanvas() {
   cellSize = Math.max(12, Math.min(24, Math.floor(maxDimension / 60)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.28;
+  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.16;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
@@ -76,16 +77,16 @@ function sampleGradient(t) {
   return last;
 }
 
-function draw() {
+function draw(timestamp = 0) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const cols = Math.ceil(canvas.width / cellSize);
   const rows = Math.ceil(canvas.height / cellSize);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.22);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.22);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.38);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.38);
 
-  const offsetCenterX = lerp(center.x, mouse.x, 0.38);
-  const offsetCenterY = lerp(center.y, mouse.y, 0.38);
+  const offsetCenterX = lerp(center.x, mouse.x, 0.68);
+  const offsetCenterY = lerp(center.y, mouse.y, 0.68);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
@@ -95,7 +96,8 @@ function draw() {
       const dy = (py + cellSize / 2) - offsetCenterY;
       const dist = Math.hypot(dx, dy);
 
-      const gradientT = clamp01(dist / maxRadius);
+      const ripple = Math.sin(dist * wave.frequency - timestamp * wave.speed) * wave.amplitude;
+      const gradientT = clamp01(dist / maxRadius + ripple);
       const color = sampleGradient(gradientT);
 
       ctx.fillStyle = color;
