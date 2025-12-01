@@ -27,7 +27,7 @@ function resizeCanvas() {
   cellSize = Math.max(12, Math.min(24, Math.floor(maxDimension / 60)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.38;
+  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.28;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
@@ -81,11 +81,11 @@ function draw() {
   const cols = Math.ceil(canvas.width / cellSize);
   const rows = Math.ceil(canvas.height / cellSize);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.12);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.12);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.22);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.22);
 
-  const offsetCenterX = lerp(center.x, mouse.x, 0.2);
-  const offsetCenterY = lerp(center.y, mouse.y, 0.2);
+  const offsetCenterX = lerp(center.x, mouse.x, 0.38);
+  const offsetCenterY = lerp(center.y, mouse.y, 0.38);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
