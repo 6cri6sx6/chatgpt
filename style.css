@@ -1,7 +1,8 @@
 :root {
-  --bg-dark-1: #003d33;
-  --bg-dark-2: #005544;
-  --accent-1: #d14234;
+  /* Pixel gradient palette inspired by the reference image */
+  --bg-top: #46d8e3;
+  --bg-mid: #2f9ccf;
+  --bg-bottom: #4a2d8f;
   --text-main: #eae3d9;
 }
 
@@ -12,7 +13,7 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  background: var(--bg-dark-1);
+  background: var(--bg-bottom);
   color: var(--text-main);
   font-family: "Inter", "Press Start 2P", "VT323", "Share Tech Mono", monospace;
   overflow: hidden;
@@ -24,36 +25,10 @@ html, body {
   width: 100vw;
   height: 100vh;
   display: block;
-  background: var(--bg-dark-1);
+  background: var(--bg-bottom);
   image-rendering: pixelated;
-  filter: saturate(0.92);
+  filter: saturate(0.96);
   z-index: 0;
-}
-
-#grid-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.22)),
-    repeating-linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0.05) 0px,
-      rgba(255, 255, 255, 0.05) 1px,
-      transparent 1px,
-      transparent 12px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.05) 0px,
-      rgba(255, 255, 255, 0.05) 1px,
-      transparent 1px,
-      transparent 12px
-    );
-  transform: translate(-40%, -60%) skewX(-48deg) skewY(14deg) scale(0.675);
-  mix-blend-mode: screen;
-  opacity: 0.5;
 }
 
 .hero {
@@ -64,9 +39,9 @@ html, body {
   padding: clamp(1.25rem, 2vw, 2.5rem);
   border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.05)),
-              color-mix(in srgb, var(--bg-dark-1) 70%, var(--bg-dark-2) 30%);
-  border: 2px solid color-mix(in srgb, var(--text-main) 40%, var(--accent-1) 60%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.08)),
+              color-mix(in srgb, var(--bg-top) 45%, var(--bg-bottom) 55%);
+  border: 2px solid color-mix(in srgb, var(--text-main) 55%, var(--bg-bottom) 45%);
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.35), 0 24px 64px rgba(0, 0, 0, 0.45);
 }
 
