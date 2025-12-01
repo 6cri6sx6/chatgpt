@@ -19,16 +19,16 @@ let cellSize = 18;
 const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
 const center = { x: 0, y: 0 };
 let maxRadius = 260;
-const wave = { frequency: 0.022, speed: 0.0015, amplitude: 0.024 };
+const wave = { frequency: 0.028, speed: 0.0015, amplitude: 0.036 };
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   const maxDimension = Math.max(canvas.width, canvas.height);
-  cellSize = Math.max(12, Math.min(24, Math.floor(maxDimension / 60)));
+  cellSize = Math.max(6, Math.min(14, Math.floor(maxDimension / 100)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.085;
+  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.05;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
