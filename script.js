@@ -6,14 +6,12 @@ const palette = {
   bg2: getComputedStyle(document.documentElement).getPropertyValue('--bg-dark-2').trim(),
   accent1: getComputedStyle(document.documentElement).getPropertyValue('--accent-1').trim(),
   accent2: getComputedStyle(document.documentElement).getPropertyValue('--accent-2').trim(),
-  accent3: getComputedStyle(document.documentElement).getPropertyValue('--accent-3').trim(),
 };
 
 const gradientStops = [
   { pos: 0.0, color: palette.accent1 },
-  { pos: 0.28, color: palette.accent2 },
-  { pos: 0.55, color: palette.accent3 },
-  { pos: 0.78, color: palette.bg2 },
+  { pos: 0.32, color: palette.accent2 },
+  { pos: 0.64, color: palette.bg2 },
   { pos: 1.0, color: palette.bg1 },
 ];
 
@@ -29,7 +27,7 @@ function resizeCanvas() {
   cellSize = Math.max(12, Math.min(24, Math.floor(maxDimension / 60)));
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
-  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.55;
+  maxRadius = Math.hypot(canvas.width, canvas.height) * 0.38;
 
   if (mouse.x === 0 && mouse.y === 0 && mouse.targetX === 0 && mouse.targetY === 0) {
     mouse.x = mouse.targetX = center.x;
@@ -83,11 +81,11 @@ function draw() {
   const cols = Math.ceil(canvas.width / cellSize);
   const rows = Math.ceil(canvas.height / cellSize);
 
-  mouse.x = lerp(mouse.x, mouse.targetX, 0.08);
-  mouse.y = lerp(mouse.y, mouse.targetY, 0.08);
+  mouse.x = lerp(mouse.x, mouse.targetX, 0.12);
+  mouse.y = lerp(mouse.y, mouse.targetY, 0.12);
 
-  const offsetCenterX = lerp(center.x, mouse.x, 0.12);
-  const offsetCenterY = lerp(center.y, mouse.y, 0.12);
+  const offsetCenterX = lerp(center.x, mouse.x, 0.2);
+  const offsetCenterY = lerp(center.y, mouse.y, 0.2);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
